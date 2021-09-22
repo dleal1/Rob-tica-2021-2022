@@ -1,0 +1,15 @@
+/home/dleal/Robotica-2021-2022/practica2/CMakeFiles/install/strip.dir
+/home/dleal/Robotica-2021-2022/practica2/CMakeFiles/install/local.dir
+/home/dleal/Robotica-2021-2022/practica2/CMakeFiles/install.dir
+/home/dleal/Robotica-2021-2022/practica2/CMakeFiles/list_install_components.dir
+/home/dleal/Robotica-2021-2022/practica2/CMakeFiles/rebuild_cache.dir
+/home/dleal/Robotica-2021-2022/practica2/CMakeFiles/edit_cache.dir
+/home/dleal/Robotica-2021-2022/practica2/src/CMakeFiles/install/strip.dir
+/home/dleal/Robotica-2021-2022/practica2/src/CMakeFiles/install/local.dir
+/home/dleal/Robotica-2021-2022/practica2/src/CMakeFiles/edit_cache.dir
+/home/dleal/Robotica-2021-2022/practica2/src/CMakeFiles/install.dir
+/home/dleal/Robotica-2021-2022/practica2/src/CMakeFiles/list_install_components.dir
+/home/dleal/Robotica-2021-2022/practica2/src/CMakeFiles/rebuild_cache.dir
+/home/dleal/Robotica-2021-2022/practica2/src/CMakeFiles/chocachoca.dir
+/home/dleal/Robotica-2021-2022/practica2/src/CMakeFiles/ICES__home_dleal_Robotica-2021-2022_practica2_src.dir
+/home/dleal/Robotica-2021-2022/practica2/src/CMakeFiles/chocachoca_autogen.dir
