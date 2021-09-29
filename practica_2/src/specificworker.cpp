@@ -71,25 +71,56 @@ void SpecificWorker::initialize(int period)
 
 void SpecificWorker::compute( )
 {
-    const float threshold = 200; // millimeters
+    const float threshold = 600; // millimeters
     float rot = 0.6;  // rads per second
+    int condicion = 0;
+    float limiteRadian = 6;
+    srand(time(NULL));
+
 
     try
     {
     	// read laser data 
         RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData(); 
 	//sort laser data from small to large distances using a lambda function.
-        std::sort( ldata.begin(), ldata.end(), [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return     a.dist < b.dist; });  
-        
-	if( ldata.front().dist < threshold)
+        std::sort( ldata.begin() + 10, ldata.end() - 10, [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return     a.dist < b.dist; });
+
+
+	if(ldata[10].dist < threshold)
 	{
-		std::cout << ldata.front().dist << std::endl;
- 		differentialrobot_proxy->setSpeedBase(5, rot);
-		usleep(rand()%(1500000-100000 + 1) + 100000);  // random wait between 1.5s and 0.1sec
+        switch(condicion) {
+            case 0:
+                //andar recto hasta chocar
+                std::cout << ldata[10].dist << std::endl;
+                differentialrobot_proxy->setSpeedBase(5, 0.6);
+                //usleep(rand() % (1500000 - 100000 + 1) + 100000);  // random wait between 1.5s and 0.1sec
+
+                break;
+
+            case 1:
+                std::cout << ldata[10].dist << std::endl;
+                differentialrobot_proxy->setSpeedBase(5, rot + 0.2);
+                if (limiteRadian < rot){
+                    rot = 0.6;
+                }
+                break;
+
+//            case 2:
+//                std::cout << ldata[10].dist << std::endl;
+//                differentialrobot_proxy->setSpeedBase(5,rand()%6);
+//                break;
+        }
+        if (condicion == 1)
+        {
+            condicion = 0;
+        } else
+        {
+            condicion++;
+        }
 	}
 	else
 	{
-		differentialrobot_proxy->setSpeedBase(180, 0); 
+		differentialrobot_proxy->setSpeedBase(1000, 0);
   	}
     }
     catch(const Ice::Exception &ex)

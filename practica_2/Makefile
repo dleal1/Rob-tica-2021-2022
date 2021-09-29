@@ -48,10 +48,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/dleal/Robotica-2021-2022/practica3
+CMAKE_SOURCE_DIR = /home/alumno/robocomp/G2-X2/practica_2
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/dleal/Robotica-2021-2022/practica3
+CMAKE_BINARY_DIR = /home/alumno/robocomp/G2-X2/practica_2
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -126,9 +126,9 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/dleal/Robotica-2021-2022/practica3/CMakeFiles /home/dleal/Robotica-2021-2022/practica3/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/alumno/robocomp/G2-X2/practica_2/CMakeFiles /home/alumno/robocomp/G2-X2/practica_2/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/dleal/Robotica-2021-2022/practica3/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/alumno/robocomp/G2-X2/practica_2/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -170,17 +170,17 @@ chocachoca/fast:
 .PHONY : chocachoca/fast
 
 #=============================================================================
-# Target rules for targets named ICES__home_dleal_Robotica-2021-2022_practica3_src
+# Target rules for targets named ICES__home_alumno_robocomp_G2-X2_practica_2_src
 
 # Build rule for target.
-ICES__home_dleal_Robotica-2021-2022_practica3_src: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 ICES__home_dleal_Robotica-2021-2022_practica3_src
-.PHONY : ICES__home_dleal_Robotica-2021-2022_practica3_src
+ICES__home_alumno_robocomp_G2-X2_practica_2_src: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 ICES__home_alumno_robocomp_G2-X2_practica_2_src
+.PHONY : ICES__home_alumno_robocomp_G2-X2_practica_2_src
 
 # fast build rule for target.
-ICES__home_dleal_Robotica-2021-2022_practica3_src/fast:
-	$(MAKE) -f src/CMakeFiles/ICES__home_dleal_Robotica-2021-2022_practica3_src.dir/build.make src/CMakeFiles/ICES__home_dleal_Robotica-2021-2022_practica3_src.dir/build
-.PHONY : ICES__home_dleal_Robotica-2021-2022_practica3_src/fast
+ICES__home_alumno_robocomp_G2-X2_practica_2_src/fast:
+	$(MAKE) -f src/CMakeFiles/ICES__home_alumno_robocomp_G2-X2_practica_2_src.dir/build.make src/CMakeFiles/ICES__home_alumno_robocomp_G2-X2_practica_2_src.dir/build
+.PHONY : ICES__home_alumno_robocomp_G2-X2_practica_2_src/fast
 
 #=============================================================================
 # Target rules for targets named chocachoca_autogen
@@ -208,7 +208,7 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... chocachoca"
-	@echo "... ICES__home_dleal_Robotica-2021-2022_practica3_src"
+	@echo "... ICES__home_alumno_robocomp_G2-X2_practica_2_src"
 	@echo "... chocachoca_autogen"
 .PHONY : help
 

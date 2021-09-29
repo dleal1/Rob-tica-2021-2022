@@ -20,6 +20,8 @@
 #define SPECIFICMONITOR_H
 
 #include "genericmonitor.h"
+#include <stdlib.h>
+#include <time.h>
 
 /**
        \brief

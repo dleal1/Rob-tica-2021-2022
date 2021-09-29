@@ -6,19 +6,19 @@
 
 #IncludeRegexTransform: 
 
-/home/dleal/Robotica-2021-2022/practica3/src/specificworker.cpp
+/home/alumno/robocomp/G2-X2/practica_2/src/specificworker.cpp
 specificworker.h
-/home/dleal/Robotica-2021-2022/practica3/src/specificworker.h
+/home/alumno/robocomp/G2-X2/practica_2/src/specificworker.h
 
-/home/dleal/Robotica-2021-2022/practica3/src/specificworker.h
+/home/alumno/robocomp/G2-X2/practica_2/src/specificworker.h
 genericworker.h
 -
 innermodel/innermodel.h
 -
 
-/home/dleal/robocomp/classes/qlog/qlog.h
+/home/alumno/robocomp/classes/qlog/qlog.h
 config.h
-/home/dleal/robocomp/classes/qlog/config.h
+/home/alumno/robocomp/classes/qlog/config.h
 QtCore
 -
 iostream
