@@ -71,12 +71,9 @@ void SpecificWorker::initialize(int period)
 
 void SpecificWorker::compute( )
 {
-    const float threshold = 600; // millimeters
-    float rot = 0.6;  // rads per second
-    int condicion = 0;
-    float limiteRadian = 6;
-    srand(time(NULL));
-
+    const float threshold = 400; // millimeters
+    float rot = 0.8, limiteRot = 6.0;  // rads per second
+    int condicion = 0, va = 200;
 
     try
     {
@@ -92,30 +89,32 @@ void SpecificWorker::compute( )
             case 0:
                 //andar recto hasta chocar
                 std::cout << ldata[10].dist << std::endl;
-                differentialrobot_proxy->setSpeedBase(5, 0.6);
+                differentialrobot_proxy->setSpeedBase(50, 0.6);
                 //usleep(rand() % (1500000 - 100000 + 1) + 100000);  // random wait between 1.5s and 0.1sec
 
+                condicion = rand() % 3;
                 break;
 
             case 1:
                 std::cout << ldata[10].dist << std::endl;
-                differentialrobot_proxy->setSpeedBase(5, rot + 0.2);
-                if (limiteRadian < rot){
+                differentialrobot_proxy->setSpeedBase(50, rot + 0.2);
+                if (limiteRot < rot){
                     rot = 0.6;
                 }
+
+                condicion = rand() % 3;
                 break;
 
-//            case 2:
-//                std::cout << ldata[10].dist << std::endl;
-//                differentialrobot_proxy->setSpeedBase(5,rand()%6);
-//                break;
-        }
-        if (condicion == 1)
-        {
-            condicion = 0;
-        } else
-        {
-            condicion++;
+            case 2: // ESPIRAL
+                while(ldata[10].dist > threshold && va < 1000)
+                {
+                    ldata = laser_proxy->getLaserData();
+                    std::sort(ldata.begin() + 10, ldata.end() - 10, [](RoboCompLaser::TData a, RoboCompLaser::TData b) { return a.dist < b.dist; });
+                    differentialrobot_proxy->setSpeedBase(va, rot);
+                    va = va + 20;
+                }
+                condicion = rand() % 3;
+                break;
         }
 	}
 	else

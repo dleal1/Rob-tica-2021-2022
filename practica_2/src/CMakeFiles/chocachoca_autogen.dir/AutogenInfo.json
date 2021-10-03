@@ -1,56 +1,56 @@
 {
-	"BUILD_DIR" : "/home/alumno/robocomp/G2-X2/practica_2/src/chocachoca_autogen",
-	"CMAKE_BINARY_DIR" : "/home/alumno/robocomp/G2-X2/practica_2",
-	"CMAKE_CURRENT_BINARY_DIR" : "/home/alumno/robocomp/G2-X2/practica_2/src",
-	"CMAKE_CURRENT_SOURCE_DIR" : "/home/alumno/robocomp/G2-X2/practica_2/src",
+	"BUILD_DIR" : "/home/dleal/G2-X2/practica_2/src/chocachoca_autogen",
+	"CMAKE_BINARY_DIR" : "/home/dleal/G2-X2/practica_2",
+	"CMAKE_CURRENT_BINARY_DIR" : "/home/dleal/G2-X2/practica_2/src",
+	"CMAKE_CURRENT_SOURCE_DIR" : "/home/dleal/G2-X2/practica_2/src",
 	"CMAKE_EXECUTABLE" : "/usr/bin/cmake",
-	"CMAKE_SOURCE_DIR" : "/home/alumno/robocomp/G2-X2/practica_2",
+	"CMAKE_SOURCE_DIR" : "/home/dleal/G2-X2/practica_2",
 	"HEADERS" : 
 	[
 		[
-			"/home/alumno/robocomp/G2-X2/practica_2/src/commonbehaviorI.h",
+			"/home/dleal/G2-X2/practica_2/src/commonbehaviorI.h",
 			"MU",
 			"EWIEGA46WW/moc_commonbehaviorI.cpp"
 		],
 		[
-			"/home/alumno/robocomp/G2-X2/practica_2/src/genericmonitor.h",
+			"/home/dleal/G2-X2/practica_2/src/genericmonitor.h",
 			"MU",
 			"EWIEGA46WW/moc_genericmonitor.cpp"
 		],
 		[
-			"/home/alumno/robocomp/G2-X2/practica_2/src/genericworker.h",
+			"/home/dleal/G2-X2/practica_2/src/genericworker.h",
 			"MU",
 			"EWIEGA46WW/moc_genericworker.cpp"
 		],
 		[
-			"/home/alumno/robocomp/G2-X2/practica_2/src/specificmonitor.h",
+			"/home/dleal/G2-X2/practica_2/src/specificmonitor.h",
 			"MU",
 			"EWIEGA46WW/moc_specificmonitor.cpp"
 		],
 		[
-			"/home/alumno/robocomp/G2-X2/practica_2/src/specificworker.h",
+			"/home/dleal/G2-X2/practica_2/src/specificworker.h",
 			"MU",
 			"EWIEGA46WW/moc_specificworker.cpp"
 		],
 		[
-			"/home/alumno/robocomp/classes/qlog/qlog.h",
+			"/home/dleal/robocomp/classes/qlog/qlog.h",
 			"MU",
-			"DVFBV33MU7/moc_qlog.cpp"
+			"OROJNWSH7A/moc_qlog.cpp"
 		],
 		[
-			"/home/alumno/robocomp/classes/rapplication/rapplication.h",
+			"/home/dleal/robocomp/classes/rapplication/rapplication.h",
 			"MU",
-			"GKJOXEN2T4/moc_rapplication.cpp"
+			"QZSAL67FLE/moc_rapplication.cpp"
 		],
 		[
-			"/home/alumno/robocomp/classes/sigwatch/sigwatch.h",
+			"/home/dleal/robocomp/classes/sigwatch/sigwatch.h",
 			"MU",
-			"Z2MVH3G4AO/moc_sigwatch.cpp"
+			"4G2R3CM4GT/moc_sigwatch.cpp"
 		]
 	],
 	"HEADER_EXTENSIONS" : [ "h", "hh", "h++", "hm", "hpp", "hxx", "in", "txx" ],
-	"INCLUDE_DIR" : "/home/alumno/robocomp/G2-X2/practica_2/src/chocachoca_autogen/include",
-	"MOC_COMPILATION_FILE" : "/home/alumno/robocomp/G2-X2/practica_2/src/chocachoca_autogen/mocs_compilation.cpp",
+	"INCLUDE_DIR" : "/home/dleal/G2-X2/practica_2/src/chocachoca_autogen/include",
+	"MOC_COMPILATION_FILE" : "/home/dleal/G2-X2/practica_2/src/chocachoca_autogen/mocs_compilation.cpp",
 	"MOC_DEFINITIONS" : 
 	[
 		"ICE_CPP11_MAPPING",
@@ -73,14 +73,14 @@
 	],
 	"MOC_INCLUDES" : 
 	[
-		"/home/alumno/robocomp/G2-X2/practica_2/src",
-		"/home/alumno/robocomp/G2-X2/practica_2/src",
+		"/home/dleal/G2-X2/practica_2/src",
+		"/home/dleal/G2-X2/practica_2/src",
 		"/opt/robocomp/include",
 		"/classes",
-		"/home/alumno/robocomp/G2-X2/practica_2",
-		"/home/alumno/robocomp/classes",
-		"/home/alumno/robocomp/libs",
-		"/home/alumno/robocomp/interfaces",
+		"/home/dleal/G2-X2/practica_2",
+		"/home/dleal/robocomp/classes",
+		"/home/dleal/robocomp/libs",
+		"/home/dleal/robocomp/interfaces",
 		"/include",
 		"/usr/include/x86_64-linux-gnu/qt5",
 		"/usr/include/x86_64-linux-gnu/qt5/QtGui",
@@ -92,10 +92,10 @@
 		"/usr/include/x86_64-linux-gnu/qt5/QtXml",
 		"/usr/include/x86_64-linux-gnu/qt5/QtXmlPatterns",
 		"/usr/include/x86_64-linux-gnu/qt5/QtNetwork",
-		"/usr/include/c++/10",
-		"/usr/include/x86_64-linux-gnu/c++/10",
-		"/usr/include/c++/10/backward",
-		"/usr/lib/gcc/x86_64-linux-gnu/10/include",
+		"/usr/include/c++/9",
+		"/usr/include/x86_64-linux-gnu/c++/9",
+		"/usr/include/c++/9/backward",
+		"/usr/lib/gcc/x86_64-linux-gnu/9/include",
 		"/usr/local/include",
 		"/usr/include/x86_64-linux-gnu",
 		"/usr/include"
@@ -111,51 +111,45 @@
 		"-c",
 		"/usr/share/cmake-3.16/Modules/CMakeCXXCompilerABI.cpp"
 	],
-	"MOC_PREDEFS_FILE" : "/home/alumno/robocomp/G2-X2/practica_2/src/chocachoca_autogen/moc_predefs.h",
+	"MOC_PREDEFS_FILE" : "/home/dleal/G2-X2/practica_2/src/chocachoca_autogen/moc_predefs.h",
 	"MOC_RELAXED_MODE" : false,
 	"MOC_SKIP" : 
 	[
-		"/home/alumno/robocomp/G2-X2/practica_2/src/CommonBehavior.cpp",
-		"/home/alumno/robocomp/G2-X2/practica_2/src/DifferentialRobot.cpp",
-		"/home/alumno/robocomp/G2-X2/practica_2/src/GenericBase.cpp",
-		"/home/alumno/robocomp/G2-X2/practica_2/src/Laser.cpp",
-		"/home/alumno/robocomp/G2-X2/practica_2/src/ui_mainUI.h"
+		"/home/dleal/G2-X2/practica_2/src/CommonBehavior.cpp",
+		"/home/dleal/G2-X2/practica_2/src/DifferentialRobot.cpp",
+		"/home/dleal/G2-X2/practica_2/src/GenericBase.cpp",
+		"/home/dleal/G2-X2/practica_2/src/Laser.cpp",
+		"/home/dleal/G2-X2/practica_2/src/ui_mainUI.h"
 	],
 	"MULTI_CONFIG" : false,
-	"PARALLEL" : 8,
-	"PARSE_CACHE_FILE" : "/home/alumno/robocomp/G2-X2/practica_2/src/CMakeFiles/chocachoca_autogen.dir/ParseCache.txt",
+	"PARALLEL" : 2,
+	"PARSE_CACHE_FILE" : "/home/dleal/G2-X2/practica_2/src/CMakeFiles/chocachoca_autogen.dir/ParseCache.txt",
 	"QT_MOC_EXECUTABLE" : "/usr/lib/qt5/bin/moc",
 	"QT_UIC_EXECUTABLE" : "/usr/lib/qt5/bin/uic",
 	"QT_VERSION_MAJOR" : 5,
-	"SETTINGS_FILE" : "/home/alumno/robocomp/G2-X2/practica_2/src/CMakeFiles/chocachoca_autogen.dir/AutogenUsed.txt",
+	"SETTINGS_FILE" : "/home/dleal/G2-X2/practica_2/src/CMakeFiles/chocachoca_autogen.dir/AutogenUsed.txt",
 	"SOURCES" : 
 	[
-		[
-			"/home/alumno/robocomp/G2-X2/practica_2/src/commonbehaviorI.cpp",
-			"MU"
-		],
-		[ "/home/alumno/robocomp/G2-X2/practica_2/src/genericmonitor.cpp", "MU" ],
-		[ "/home/alumno/robocomp/G2-X2/practica_2/src/genericworker.cpp", "MU" ],
-		[ "/home/alumno/robocomp/G2-X2/practica_2/src/main.cpp", "MU" ],
-		[
-			"/home/alumno/robocomp/G2-X2/practica_2/src/specificmonitor.cpp",
-			"MU"
-		],
-		[ "/home/alumno/robocomp/G2-X2/practica_2/src/specificworker.cpp", "MU" ],
-		[ "/home/alumno/robocomp/classes/qlog/qlog.cpp", "MU" ],
-		[ "/home/alumno/robocomp/classes/rapplication/rapplication.cpp", "MU" ],
-		[ "/home/alumno/robocomp/classes/sigwatch/sigwatch.cpp", "MU" ]
+		[ "/home/dleal/G2-X2/practica_2/src/commonbehaviorI.cpp", "MU" ],
+		[ "/home/dleal/G2-X2/practica_2/src/genericmonitor.cpp", "MU" ],
+		[ "/home/dleal/G2-X2/practica_2/src/genericworker.cpp", "MU" ],
+		[ "/home/dleal/G2-X2/practica_2/src/main.cpp", "MU" ],
+		[ "/home/dleal/G2-X2/practica_2/src/specificmonitor.cpp", "MU" ],
+		[ "/home/dleal/G2-X2/practica_2/src/specificworker.cpp", "MU" ],
+		[ "/home/dleal/robocomp/classes/qlog/qlog.cpp", "MU" ],
+		[ "/home/dleal/robocomp/classes/rapplication/rapplication.cpp", "MU" ],
+		[ "/home/dleal/robocomp/classes/sigwatch/sigwatch.cpp", "MU" ]
 	],
 	"UIC_OPTIONS" : [],
 	"UIC_SEARCH_PATHS" : [],
 	"UIC_SKIP" : 
 	[
-		"/home/alumno/robocomp/G2-X2/practica_2/src/CommonBehavior.cpp",
-		"/home/alumno/robocomp/G2-X2/practica_2/src/DifferentialRobot.cpp",
-		"/home/alumno/robocomp/G2-X2/practica_2/src/GenericBase.cpp",
-		"/home/alumno/robocomp/G2-X2/practica_2/src/Laser.cpp",
-		"/home/alumno/robocomp/G2-X2/practica_2/src/mainUI.ui",
-		"/home/alumno/robocomp/G2-X2/practica_2/src/ui_mainUI.h"
+		"/home/dleal/G2-X2/practica_2/src/CommonBehavior.cpp",
+		"/home/dleal/G2-X2/practica_2/src/DifferentialRobot.cpp",
+		"/home/dleal/G2-X2/practica_2/src/GenericBase.cpp",
+		"/home/dleal/G2-X2/practica_2/src/Laser.cpp",
+		"/home/dleal/G2-X2/practica_2/src/mainUI.ui",
+		"/home/dleal/G2-X2/practica_2/src/ui_mainUI.h"
 	],
 	"UIC_UI_FILES" : [],
 	"VERBOSITY" : 0

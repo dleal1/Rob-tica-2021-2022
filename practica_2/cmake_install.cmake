@@ -1,4 +1,4 @@
-# Install script for directory: /home/alumno/robocomp/G2-X2/practica_2
+# Install script for directory: /home/dleal/G2-X2/practica_2
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -46,12 +46,12 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION)
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
-file(INSTALL DESTINATION "/opt/robocomp/etc-default" TYPE FILE RENAME "chocachoca.conf" FILES "/home/alumno/robocomp/G2-X2/practica_2/etc/config")
+file(INSTALL DESTINATION "/opt/robocomp/etc-default" TYPE FILE RENAME "chocachoca.conf" FILES "/home/dleal/G2-X2/practica_2/etc/config")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/alumno/robocomp/G2-X2/practica_2/src/cmake_install.cmake")
+  include("/home/dleal/G2-X2/practica_2/src/cmake_install.cmake")
 
 endif()
 
@@ -63,5 +63,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/alumno/robocomp/G2-X2/practica_2/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/dleal/G2-X2/practica_2/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

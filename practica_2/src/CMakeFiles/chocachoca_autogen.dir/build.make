@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/alumno/robocomp/G2-X2/practica_2
+CMAKE_SOURCE_DIR = /home/dleal/G2-X2/practica_2
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/alumno/robocomp/G2-X2/practica_2
+CMAKE_BINARY_DIR = /home/dleal/G2-X2/practica_2
 
 # Utility rule file for chocachoca_autogen.
 
@@ -54,8 +54,8 @@ CMAKE_BINARY_DIR = /home/alumno/robocomp/G2-X2/practica_2
 include src/CMakeFiles/chocachoca_autogen.dir/progress.make
 
 src/CMakeFiles/chocachoca_autogen:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/alumno/robocomp/G2-X2/practica_2/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Automatic MOC and UIC for target chocachoca"
-	cd /home/alumno/robocomp/G2-X2/practica_2/src && /usr/bin/cmake -E cmake_autogen /home/alumno/robocomp/G2-X2/practica_2/src/CMakeFiles/chocachoca_autogen.dir/AutogenInfo.json ""
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/dleal/G2-X2/practica_2/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Automatic MOC and UIC for target chocachoca"
+	cd /home/dleal/G2-X2/practica_2/src && /usr/bin/cmake -E cmake_autogen /home/dleal/G2-X2/practica_2/src/CMakeFiles/chocachoca_autogen.dir/AutogenInfo.json ""
 
 chocachoca_autogen: src/CMakeFiles/chocachoca_autogen
 chocachoca_autogen: src/CMakeFiles/chocachoca_autogen.dir/build.make
@@ -68,10 +68,10 @@ src/CMakeFiles/chocachoca_autogen.dir/build: chocachoca_autogen
 .PHONY : src/CMakeFiles/chocachoca_autogen.dir/build
 
 src/CMakeFiles/chocachoca_autogen.dir/clean:
-	cd /home/alumno/robocomp/G2-X2/practica_2/src && $(CMAKE_COMMAND) -P CMakeFiles/chocachoca_autogen.dir/cmake_clean.cmake
+	cd /home/dleal/G2-X2/practica_2/src && $(CMAKE_COMMAND) -P CMakeFiles/chocachoca_autogen.dir/cmake_clean.cmake
 .PHONY : src/CMakeFiles/chocachoca_autogen.dir/clean
 
 src/CMakeFiles/chocachoca_autogen.dir/depend:
-	cd /home/alumno/robocomp/G2-X2/practica_2 && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/alumno/robocomp/G2-X2/practica_2 /home/alumno/robocomp/G2-X2/practica_2/src /home/alumno/robocomp/G2-X2/practica_2 /home/alumno/robocomp/G2-X2/practica_2/src /home/alumno/robocomp/G2-X2/practica_2/src/CMakeFiles/chocachoca_autogen.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/dleal/G2-X2/practica_2 && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/dleal/G2-X2/practica_2 /home/dleal/G2-X2/practica_2/src /home/dleal/G2-X2/practica_2 /home/dleal/G2-X2/practica_2/src /home/dleal/G2-X2/practica_2/src/CMakeFiles/chocachoca_autogen.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : src/CMakeFiles/chocachoca_autogen.dir/depend
 

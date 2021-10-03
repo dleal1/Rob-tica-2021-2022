@@ -13,8 +13,8 @@ set(CMAKE_MAKEFILE_DEPENDS
   "CMakeLists.txt"
   "src/CMakeLists.txt"
   "src/CMakeListsSpecific.txt"
-  "/home/alumno/robocomp/cmake/modules/qt.cmake"
-  "/home/alumno/robocomp/cmake/robocomp.cmake"
+  "/home/dleal/robocomp/cmake/modules/qt.cmake"
+  "/home/dleal/robocomp/cmake/robocomp.cmake"
   "/usr/lib/x86_64-linux-gnu/cmake/Qt5/Qt5Config.cmake"
   "/usr/lib/x86_64-linux-gnu/cmake/Qt5/Qt5ConfigVersion.cmake"
   "/usr/lib/x86_64-linux-gnu/cmake/Qt5/Qt5ModuleLocation.cmake"
@@ -185,6 +185,6 @@ set(CMAKE_MAKEFILE_PRODUCTS
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
   "src/CMakeFiles/chocachoca.dir/DependInfo.cmake"
-  "src/CMakeFiles/ICES__home_alumno_robocomp_G2-X2_practica_2_src.dir/DependInfo.cmake"
+  "src/CMakeFiles/ICES__home_dleal_G2-X2_practica_2_src.dir/DependInfo.cmake"
   "src/CMakeFiles/chocachoca_autogen.dir/DependInfo.cmake"
   )
