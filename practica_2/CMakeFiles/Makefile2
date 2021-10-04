@@ -92,8 +92,8 @@ src/clean: src/CMakeFiles/chocachoca_autogen.dir/clean
 # Target rules for target src/CMakeFiles/chocachoca.dir
 
 # All Build rule for target.
-src/CMakeFiles/chocachoca.dir/all: src/CMakeFiles/ICES__home_dleal_G2-X2_practica_2_src.dir/all
 src/CMakeFiles/chocachoca.dir/all: src/CMakeFiles/chocachoca_autogen.dir/all
+src/CMakeFiles/chocachoca.dir/all: src/CMakeFiles/ICES__home_dleal_G2-X2_practica_2_src.dir/all
 	$(MAKE) -f src/CMakeFiles/chocachoca.dir/build.make src/CMakeFiles/chocachoca.dir/depend
 	$(MAKE) -f src/CMakeFiles/chocachoca.dir/build.make src/CMakeFiles/chocachoca.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/dleal/G2-X2/practica_2/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20 "Built target chocachoca"

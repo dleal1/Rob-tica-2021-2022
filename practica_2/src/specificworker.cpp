@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2021 by YOUR NAME HERE
+ *    Copyright (C) 2021 by DANIEL LEAL MIRANDA & ALEJANDRO GONZALEZ FERNANDEZ
  *
  *    This file is part of RoboComp
  *
@@ -18,9 +18,13 @@
  */
 #include "specificworker.h"
 
+float va = 100;
+float rot = 0.6;
+
 /**
 * \brief Default constructor
 */
+
 SpecificWorker::SpecificWorker(TuplePrx tprx, bool startup_check) : GenericWorker(tprx)
 {
 	this->startup_check_flag = startup_check;
@@ -46,11 +50,6 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 //	}
 //	catch(const std::exception &e) { qFatal("Error reading config params"); }
 
-
-
-
-
-
 	return true;
 }
 
@@ -58,6 +57,9 @@ void SpecificWorker::initialize(int period)
 {
 	std::cout << "Initialize worker" << std::endl;
 	this->Period = period;
+	this->condicion = rand() % 3;
+    this->condicion2 = 0;
+    this->contador = 0;
 	if(this->startup_check_flag)
 	{
 		this->startup_check();
@@ -71,61 +73,97 @@ void SpecificWorker::initialize(int period)
 
 void SpecificWorker::compute( )
 {
-    const float threshold = 400; // millimeters
-    float rot = 0.8, limiteRot = 6.0;  // rads per second
-    int condicion = 0, va = 200;
-
+    const float threshold = 500; // millimeters
+    const float limiteRot = 2;// rads per second
+    
     try
     {
-    	// read laser data 
-        RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData(); 
-	//sort laser data from small to large distances using a lambda function.
+        // read laser data
+        RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();
+        //sort laser data from small to large distances using a lambda function.
         std::sort( ldata.begin() + 10, ldata.end() - 10, [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return     a.dist < b.dist; });
-
-
-	if(ldata[10].dist < threshold)
-	{
-        switch(condicion) {
-            case 0:
-                //andar recto hasta chocar
-                std::cout << ldata[10].dist << std::endl;
-                differentialrobot_proxy->setSpeedBase(50, 0.6);
-                //usleep(rand() % (1500000 - 100000 + 1) + 100000);  // random wait between 1.5s and 0.1sec
-
-                condicion = rand() % 3;
-                break;
-
-            case 1:
-                std::cout << ldata[10].dist << std::endl;
-                differentialrobot_proxy->setSpeedBase(50, rot + 0.2);
-                if (limiteRot < rot){
-                    rot = 0.6;
-                }
-
-                condicion = rand() % 3;
-                break;
-
-            case 2: // ESPIRAL
-                while(ldata[10].dist > threshold && va < 1000)
-                {
-                    ldata = laser_proxy->getLaserData();
-                    std::sort(ldata.begin() + 10, ldata.end() - 10, [](RoboCompLaser::TData a, RoboCompLaser::TData b) { return a.dist < b.dist; });
-                    differentialrobot_proxy->setSpeedBase(va, rot);
-                    va = va + 20;
-                }
-                condicion = rand() % 3;
-                break;
+		
+        if (rot > limiteRot){
+            rot = 0.6;
         }
-	}
-	else
-	{
-		differentialrobot_proxy->setSpeedBase(1000, 0);
-  	}
+
+        if(ldata[10].dist <= threshold)
+        {
+            condicion2 = 1;
+
+            switch(condicion) {
+                case 0:             //GIRO INVERSO
+                    std::cout << "Movimiento Giro Inverso" << std::endl;
+
+                    //ldata = laser_proxy->getLaserData();
+                    //std::sort(ldata.begin() + 10, ldata.end() - 10, [](RoboCompLaser::TData a, RoboCompLaser::TData b) { return a.dist < b.dist; });
+                    rot = rot - (M_PI/2);
+
+                    if(abs(rot) > limiteRot) {
+                        rot = 0.6;
+                    }
+
+                    differentialrobot_proxy->setSpeedBase(20, rot);
+                    usleep(rand() % (1500000 - 100000 + 1) + 100000);
+
+                    condicion = 2;
+                    break;
+
+                case 1:
+                    std::cout << "Movimiento 90º" << std::endl;
+
+                    differentialrobot_proxy->setSpeedBase(20, rot);
+                    usleep(rand() % (1500000 - 100000 + 1) + 100000);  // random wait between 1.5s and 0.1sec
+
+                    break;
+
+                case 2:
+                    std::cout << "Movimiento Aumento Rotacion" << std::endl;
+                    rot = rot + 0.2;
+
+                    if (limiteRot < rot){
+                        rot = 0.6;
+                    }
+
+                    differentialrobot_proxy->setSpeedBase(20, rot);
+                    usleep(rand() % (1500000 - 100000 + 1) + 100000);
+
+                    break;
+            }
+
+        }
+        else
+        {
+            switch (condicion2){
+                case 0:
+                    std::cout << "Movimiento Espiral " << std::endl;
+
+                    //ldata = laser_proxy->getLaserData();
+                    //std::sort(ldata.begin() + 10, ldata.end() - 10,
+                    //          [](RoboCompLaser::TData a, RoboCompLaser::TData b) { return a.dist < b.dist; });
+
+                    differentialrobot_proxy->setSpeedBase(va, rot);
+
+                    if (va <= 1000) {
+                        va += 20;
+                    }
+
+                    break;
+
+                case 1:
+                    std::cout << "Movimiento recto" << std::endl;
+
+                    differentialrobot_proxy->setSpeedBase(1000, 0);
+                    break;
+            }
+            condicion = rand() % 2;
+        }
     }
     catch(const Ice::Exception &ex)
     {
         std::cout << ex << std::endl;
     }
+
 }
 
 
