@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2021 by YOUR NAME HERE
+ *    Copyright (C) 2021 by DANIEL LEAL MIRANDA & ALEJANDRO GONZALEZ FERNANDEZ
  *
  *    This file is part of RoboComp
  *
@@ -48,8 +48,8 @@ private:
 	std::shared_ptr < InnerModel > innerModel;
 	bool startup_check_flag;
 	
-	int condicion;
-    int condicion2;
+	int condicion, condicion2;
+    bool espiral;
     int contador;
 };
 

@@ -8,10 +8,10 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/dleal/Robotica-2021-2022/practica1/ejemplo1 (update)/ejemplo1.cpp" "/home/dleal/Robotica-2021-2022/practica1/ejemplo1 (update)/cmake-build-debug/CMakeFiles/ejemplo1.dir/ejemplo1.cpp.o"
-  "/home/dleal/Robotica-2021-2022/practica1/ejemplo1 (update)/main.cpp" "/home/dleal/Robotica-2021-2022/practica1/ejemplo1 (update)/cmake-build-debug/CMakeFiles/ejemplo1.dir/main.cpp.o"
-  "/home/dleal/Robotica-2021-2022/practica1/ejemplo1 (update)/cmake-build-debug/moc_ejemplo1.cpp" "/home/dleal/Robotica-2021-2022/practica1/ejemplo1 (update)/cmake-build-debug/CMakeFiles/ejemplo1.dir/moc_ejemplo1.cpp.o"
-  "/home/dleal/Robotica-2021-2022/practica1/ejemplo1 (update)/cmake-build-debug/moc_timer.cpp" "/home/dleal/Robotica-2021-2022/practica1/ejemplo1 (update)/cmake-build-debug/CMakeFiles/ejemplo1.dir/moc_timer.cpp.o"
+  "/home/dleal/G2-X2/practica1/ejemplo1 (update)/ejemplo1.cpp" "/home/dleal/G2-X2/practica1/ejemplo1 (update)/cmake-build-debug/CMakeFiles/ejemplo1.dir/ejemplo1.cpp.o"
+  "/home/dleal/G2-X2/practica1/ejemplo1 (update)/main.cpp" "/home/dleal/G2-X2/practica1/ejemplo1 (update)/cmake-build-debug/CMakeFiles/ejemplo1.dir/main.cpp.o"
+  "/home/dleal/G2-X2/practica1/ejemplo1 (update)/cmake-build-debug/moc_ejemplo1.cpp" "/home/dleal/G2-X2/practica1/ejemplo1 (update)/cmake-build-debug/CMakeFiles/ejemplo1.dir/moc_ejemplo1.cpp.o"
+  "/home/dleal/G2-X2/practica1/ejemplo1 (update)/cmake-build-debug/moc_timer.cpp" "/home/dleal/G2-X2/practica1/ejemplo1 (update)/cmake-build-debug/CMakeFiles/ejemplo1.dir/moc_timer.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

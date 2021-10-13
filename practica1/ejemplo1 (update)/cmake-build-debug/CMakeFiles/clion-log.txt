@@ -1,4 +1,4 @@
-/home/dleal/Escritorio/CLion/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_DEPENDS_USE_COMPILER=FALSE -G "CodeBlocks - Unix Makefiles" "/home/dleal/Robotica-2021-2022/practica1/ejemplo1 (update)"
+/home/dleal/Escritorio/CLion/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_DEPENDS_USE_COMPILER=FALSE -G "CodeBlocks - Unix Makefiles" "/home/dleal/G2-X2/practica1/ejemplo1 (update)"
 -- The C compiler identification is GNU 9.3.0
 -- The CXX compiler identification is GNU 9.3.0
 -- Detecting C compiler ABI info
@@ -23,4 +23,4 @@ CMake Deprecation Warning at CMakeLists.txt:2 (cmake_minimum_required):
 -- Generating header file from counterDlg.ui
 -- Configuring done
 -- Generating done
--- Build files have been written to: /home/dleal/Robotica-2021-2022/practica1/ejemplo1 (update)/cmake-build-debug
+-- Build files have been written to: /home/dleal/G2-X2/practica1/ejemplo1 (update)/cmake-build-debug

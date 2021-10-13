@@ -18,9 +18,6 @@
  */
 #include "specificworker.h"
 
-float va = 100;
-float rot = 0.6;
-
 /**
 * \brief Default constructor
 */
@@ -58,7 +55,7 @@ void SpecificWorker::initialize(int period)
 	std::cout << "Initialize worker" << std::endl;
 	this->Period = period;
 	this->condicion = rand() % 3;
-    this->condicion2 = 0;
+    this->espiral = false;
     this->contador = 0;
 	if(this->startup_check_flag)
 	{
@@ -75,7 +72,10 @@ void SpecificWorker::compute( )
 {
     const float threshold = 500; // millimeters
     const float limiteRot = 2;// rads per second
-    
+
+    float va = 200;
+    float rot = 0.6;
+
     try
     {
         // read laser data
@@ -89,21 +89,19 @@ void SpecificWorker::compute( )
 
         if(ldata[10].dist <= threshold)
         {
-            condicion2 = 1;
-
             switch(condicion) {
                 case 0:             //GIRO INVERSO
                     std::cout << "Movimiento Giro Inverso" << std::endl;
 
                     //ldata = laser_proxy->getLaserData();
                     //std::sort(ldata.begin() + 10, ldata.end() - 10, [](RoboCompLaser::TData a, RoboCompLaser::TData b) { return a.dist < b.dist; });
-                    rot = rot - (M_PI/2);
+                    rot = rot - (M_PI_2);
 
                     if(abs(rot) > limiteRot) {
                         rot = 0.6;
                     }
 
-                    differentialrobot_proxy->setSpeedBase(20, rot);
+                    differentialrobot_proxy->setSpeedBase(50, rot);
                     usleep(rand() % (1500000 - 100000 + 1) + 100000);
 
                     condicion = 2;
@@ -112,20 +110,30 @@ void SpecificWorker::compute( )
                 case 1:
                     std::cout << "Movimiento 90º" << std::endl;
 
-                    differentialrobot_proxy->setSpeedBase(20, rot);
+                    rot = M_PI/2;
+                    differentialrobot_proxy->setSpeedBase(50, M_PI/2);
                     usleep(rand() % (1500000 - 100000 + 1) + 100000);  // random wait between 1.5s and 0.1sec
 
+                    condicion = 2;
                     break;
 
                 case 2:
                     std::cout << "Movimiento Aumento Rotacion" << std::endl;
-                    rot = rot + 0.2;
 
-                    if (limiteRot < rot){
-                        rot = 0.6;
+                    ldata = laser_proxy->getLaserData();
+                    std::sort(ldata.begin() + 10, ldata.end() - 10, [](RoboCompLaser::TData a, RoboCompLaser::TData b) { return a.dist < b.dist; });
+
+                    if (ldata[10].dist <= threshold){
+                        differentialrobot_proxy->setSpeedBase(50, rot);
+                        usleep(rand() % (1500000 - 100000 + 1) + 100000);
+                    }
+                    else{
+                        differentialrobot_proxy->setSpeedBase(50, 0);
+                        usleep(rand() % (1500000 - 100000 + 1) + 100000);
+
                     }
 
-                    differentialrobot_proxy->setSpeedBase(20, rot);
+                    differentialrobot_proxy->setSpeedBase(50, 0);
                     usleep(rand() % (1500000 - 100000 + 1) + 100000);
 
                     break;
@@ -136,24 +144,25 @@ void SpecificWorker::compute( )
         {
             switch (condicion2){
                 case 0:
-                    std::cout << "Movimiento Espiral " << std::endl;
+                    while(ldata[10].dist > threshold && va<1000 && !espiral) {
+                        std::cout << "Movimiento Espiral " << std::endl;
 
-                    //ldata = laser_proxy->getLaserData();
-                    //std::sort(ldata.begin() + 10, ldata.end() - 10,
-                    //          [](RoboCompLaser::TData a, RoboCompLaser::TData b) { return a.dist < b.dist; });
+                        ldata = laser_proxy->getLaserData();
+                        std::sort(ldata.begin() + 10, ldata.end() - 10,
+                                  [](RoboCompLaser::TData a, RoboCompLaser::TData b) { return a.dist < b.dist; });
 
-                    differentialrobot_proxy->setSpeedBase(va, rot);
-
-                    if (va <= 1000) {
+                        differentialrobot_proxy->setSpeedBase(va, 0.8);
                         va += 20;
                     }
+                    condicion2++;
+                    espiral = true;
 
                     break;
 
                 case 1:
                     std::cout << "Movimiento recto" << std::endl;
 
-                    differentialrobot_proxy->setSpeedBase(1000, 0);
+                    differentialrobot_proxy->setSpeedBase(800, 0);
                     break;
             }
             condicion = rand() % 2;
