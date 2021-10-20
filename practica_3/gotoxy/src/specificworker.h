@@ -68,7 +68,7 @@ private:
 
     QPointF world_to_robot(Target target, RoboCompGenericBase::TBaseState state);
 
-    float dist_to_target();
+    float dist_to_target(float dist);
 
     float rotation_speed(float beta);
 };

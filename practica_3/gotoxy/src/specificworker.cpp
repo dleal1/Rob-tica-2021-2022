@@ -115,25 +115,26 @@ void SpecificWorker::compute()
         // si el robot esta en el target, ponemos el target a false
         Eigen::Vector2f robot_eigen(bState.x, bState.z);
         Eigen::Vector2f target_eigen (target.dest.x(), target.dest.y());
-        if (float dist = (robot_eigen - target_eigen).norm(); dist > 100) {
+        if (float dist = (robot_eigen - target_eigen).norm(); dist > 100)
+        {
 
             // convertir el target a coordenadas del robot
             QPointF pr = world_to_robot(target, bState);
             // obtener el angulo beta (robot - target)
             float beta = atan2(pr.x(), pr.y());
             // obtener velocidad de avance (primero a 0)
-            float adv = max_adv_speed * dist_to_target() * rotation_speed(beta);
+            float adv = max_adv_speed * dist_to_target(dist) * rotation_speed(beta);
             // mover el robot con la velocidad obtenida
 
             try {
                 differentialrobot_proxy->setSpeedBase(adv, beta);
-
             }
             catch (const Ice::Exception &ex) {
                 std::cout << ex << std::endl;
             }
         } else {
             target.activo = false;
+            differentialrobot_proxy->setSpeedBase(0, 0);
         }
     }
 }
@@ -180,36 +181,40 @@ int SpecificWorker::startup_check()
 
 QPointF SpecificWorker::world_to_robot(SpecificWorker::Target target, RoboCompGenericBase::TBaseState state) {
 
-	float angulo = state.angle;
-	Eigen::Vector2f posdest(target.dest.x(), target.dest.y()), posrobot(state.x, state.y);
+	float angulo = state.alpha;
+	Eigen::Vector2f posdest(target.dest.x(), target.dest.y()), posrobot(state.x, state.z);
 	Eigen::Matrix2f matriz(2,2);
 	
 	matriz << cos(angulo), sin(angulo), -sin(angulo), cos(angulo);
 	
 	Eigen::Vector2f estado = matriz * (posdest - posrobot);
 
+    std::cout << estado[0] << "\t" << estado[1] << std::endl;
+
     return QPointF(estado[0], estado[1]); // crear matriz con eigen 2f. bstate.angle
 }
 
 
-float SpecificWorker::dist_to_target(float d) {
-
-	
-
-    return 0;
+float SpecificWorker::dist_to_target(float dist)
+{
+    if(dist > 1000)
+        return 1;
+    else
+        return (1.0/1000.0) * dist;
 }
 
 float SpecificWorker::rotation_speed(float beta) {
 
+    static float lambda = -(0.5 * 0.5) / log(0.1);
 
-
-    return 0;
+    return exp(-(beta * beta) / lambda);
 }
 
 /* if d>1 -> v=1
  * else
  * pendiente*distancia la pendiente depende del valor, otra forma es la sigmoide s=1/1-e^x
- * queremos que frene cuando este girando, cuando vel=0, angulo=1. varia la funcion en funcion del parametro (funcion gaussiana) g = e^(-x^2/lamda -> ln 0.4 = -0.5^2/lamda -> lamda = -gh^2 / ln ah
+ * queremos que frene cuando este girando, cuando vel=0, angulo=1. varia la funcion en funcion del parametro (funcion gaussiana)
+ * g = e^(-x^2/lamda) -> ln 0.4 = -0.5^2/lamda -> lamda = -gh^2 / ln ah
 */
 
 /**************************************/
