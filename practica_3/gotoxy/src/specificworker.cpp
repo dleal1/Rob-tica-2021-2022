@@ -67,24 +67,108 @@ void SpecificWorker::initialize(int period)
 		timer.start(Period);
 	}
 
+    QRectF dimensions (-5000, -2500, 10000, 5000);
+    viewer = new AbstractGraphicViewer(this, dimensions);
+    this->resize(900,450);
+    robot_polygon = viewer->add_robot(ROBOT_LENGTH);
+    laser_in_robot_polygon = new QGraphicsRectItem(-10, 10, 20, 20, robot_polygon);
+    laser_in_robot_polygon->setPos(0, 190);     // move this to abstract
+    try
+    {
+        RoboCompGenericBase::TBaseState bState;
+        differentialrobot_proxy->getBaseState(bState);
+        last_point = QPointF(bState.x, bState.z);
+    }
+    catch(const Ice::Exception &e) { std::cout << e.what() << std::endl;}
+
+    connect(viewer, &AbstractGraphicViewer::new_mouse_coordinates, this, &SpecificWorker::new_target_slot);
+
 }
 
 void SpecificWorker::compute()
 {
-	//computeCODE
-	//QMutexLocker locker(mutex);
-	//try
-	//{
-	//  camera_proxy->getYImage(0,img, cState, bState);
-	//  memcpy(image_gray.data, &img[0], m_width*m_height*sizeof(uchar));
-	//  searchTags(image_gray);
-	//}
-	//catch(const Ice::Exception &e)
-	//{
-	//  std::cout << "Error reading from Camera" << e << std::endl;
-	//}
-	
-	
+    RoboCompGenericBase::TBaseState bState;
+    try {
+        // read laser data
+        RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();
+        draw_laser(ldata);
+
+    }
+    catch(const Ice::Exception &ex)
+    {
+        std::cout << ex << std::endl;
+    }
+
+    try
+    {
+        differentialrobot_proxy->getBaseState(bState);
+        robot_polygon->setRotation(bState.alpha*180/M_PI);
+        robot_polygon->setPos(bState.x, bState.z);
+        //qInfo() << bState.x << bState.z << bState.alpha;
+
+    }
+    catch (const Ice::Exception &ex){
+        std::cout << ex << std::endl;
+    }
+
+    if(target.activo) {
+        // si el robot esta en el target, ponemos el target a false
+        Eigen::Vector2f robot_eigen(bState.x, bState.z);
+        Eigen::Vector2f target_eigen (target.dest.x(), target.dest.y());
+        if (float dist = (robot_eigen - target_eigen).norm(); dist > 100) {
+
+            // convertir el target a coordenadas del robot
+            QPointF pr = world_to_robot(target, bState);
+            // obtener el angulo beta (robot - target)
+            float beta = atan2(pr.x(), pr.y());
+            // obtener velocidad de avance (primero a 0)
+            float adv = max_adv_speed * dist_to_target() * rotation_speed(beta);
+            // mover el robot con la velocidad obtenida
+
+            try {
+                differentialrobot_proxy->setSpeedBase(adv, beta);
+
+            }
+            catch (const Ice::Exception &ex) {
+                std::cout << ex << std::endl;
+            }
+        } else {
+            target.activo = false;
+        }
+    }
+}
+
+void SpecificWorker :: draw_laser(const RoboCompLaser:: TLaserData &ldata)
+{
+    static QGraphicsItem *laser_polygon = nullptr;
+    QPolygonF poly;
+
+    if(laser_polygon != nullptr) {
+        viewer->scene.removeItem(laser_polygon);
+    }
+
+    poly << QPointF(0,0);
+
+    for(auto &p : ldata)
+    {
+        float x = p.dist * sin(p.angle);
+        float y = p.dist * cos(p.angle);
+        poly << QPointF(x,y);
+    }
+
+    QColor color ("Verde claro");
+    color.setAlpha(40);
+    laser_polygon = viewer->scene.addPolygon(laser_in_robot_polygon->mapToScene(poly), QPen(QColor("DarkGreen"), 30), QBrush(color));
+    laser_polygon->setZValue(3);
+}
+
+void SpecificWorker :: new_target_slot(QPointF point){
+
+    qInfo() << point;       // muestra coordenadas con click
+
+    target.dest = point;
+    target.activo = true;
+
 }
 
 int SpecificWorker::startup_check()
@@ -94,8 +178,39 @@ int SpecificWorker::startup_check()
 	return 0;
 }
 
+QPointF SpecificWorker::world_to_robot(SpecificWorker::Target target, RoboCompGenericBase::TBaseState state) {
+
+	float angulo = state.angle;
+	Eigen::Vector2f posdest(target.dest.x(), target.dest.y()), posrobot(state.x, state.y);
+	Eigen::Matrix2f matriz(2,2);
+	
+	matriz << cos(angulo), sin(angulo), -sin(angulo), cos(angulo);
+	
+	Eigen::Vector2f estado = matriz * (posdest - posrobot);
+
+    return QPointF(estado[0], estado[1]); // crear matriz con eigen 2f. bstate.angle
+}
 
 
+float SpecificWorker::dist_to_target(float d) {
+
+	
+
+    return 0;
+}
+
+float SpecificWorker::rotation_speed(float beta) {
+
+
+
+    return 0;
+}
+
+/* if d>1 -> v=1
+ * else
+ * pendiente*distancia la pendiente depende del valor, otra forma es la sigmoide s=1/1-e^x
+ * queremos que frene cuando este girando, cuando vel=0, angulo=1. varia la funcion en funcion del parametro (funcion gaussiana) g = e^(-x^2/lamda -> ln 0.4 = -0.5^2/lamda -> lamda = -gh^2 / ln ah
+*/
 
 /**************************************/
 // From the RoboCompDifferentialRobot you can call this methods:
