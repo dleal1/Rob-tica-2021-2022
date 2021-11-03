@@ -58,3 +58,61 @@ make: *** [Makefile:127: cmTC_69417/fast] Error 2
 
 
 
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/dleal/G2-X2/practica_4/gotoxy/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_e6093/fast && /usr/bin/make -f CMakeFiles/cmTC_e6093.dir/build.make CMakeFiles/cmTC_e6093.dir/build
+make[1]: se entra en el directorio '/home/dleal/G2-X2/practica_4/gotoxy/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_e6093.dir/src.c.o
+/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_e6093.dir/src.c.o   -c /home/dleal/G2-X2/practica_4/gotoxy/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_e6093
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e6093.dir/link.txt --verbose=1
+/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD    CMakeFiles/cmTC_e6093.dir/src.c.o  -o cmTC_e6093 
+/usr/bin/ld: CMakeFiles/cmTC_e6093.dir/src.c.o: en la función `main':
+src.c:(.text+0x46): referencia a `pthread_create' sin definir
+/usr/bin/ld: src.c:(.text+0x52): referencia a `pthread_detach' sin definir
+/usr/bin/ld: src.c:(.text+0x63): referencia a `pthread_join' sin definir
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_e6093.dir/build.make:87: cmTC_e6093] Error 1
+make[1]: se sale del directorio '/home/dleal/G2-X2/practica_4/gotoxy/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_e6093/fast] Error 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/dleal/G2-X2/practica_4/gotoxy/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_19de2/fast && /usr/bin/make -f CMakeFiles/cmTC_19de2.dir/build.make CMakeFiles/cmTC_19de2.dir/build
+make[1]: se entra en el directorio '/home/dleal/G2-X2/practica_4/gotoxy/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_19de2.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_19de2.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.16/Modules/CheckFunctionExists.c
+Linking C executable cmTC_19de2
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_19de2.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTC_19de2.dir/CheckFunctionExists.c.o  -o cmTC_19de2  -lpthreads 
+/usr/bin/ld: no se puede encontrar -lpthreads
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_19de2.dir/build.make:87: cmTC_19de2] Error 1
+make[1]: se sale del directorio '/home/dleal/G2-X2/practica_4/gotoxy/CMakeFiles/CMakeTmp'
+make: *** [Makefile:121: cmTC_19de2/fast] Error 2
+
+
+

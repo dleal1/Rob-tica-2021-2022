@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2021 by YOUR NAME HERE
+ *    Copyright (C) 2021 by DANIEL LEAL MIRANDA & ALEJANDRO GONZALEZ FERNANDEZ
  *
  *    This file is part of RoboComp
  *
@@ -31,6 +31,7 @@
 #include <innermodel/innermodel.h>
 #include <abstract_graphic_viewer/abstract_graphic_viewer.h>
 #include <eigen3/Eigen/Eigen>
+#include <cppitertools/enumerate.hpp>
 
 class SpecificWorker : public GenericWorker
 {
@@ -40,14 +41,13 @@ public:
 	~SpecificWorker();
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
 
-
-
 public slots:
 	void compute();
 	int startup_check();
     void draw_laser(const RoboCompLaser:: TLaserData & ldata);
 	void initialize(int period);
     void new_target_slot(QPointF point);
+
 private:
 	std::shared_ptr < InnerModel > innerModel;
 	bool startup_check_flag;
@@ -66,10 +66,12 @@ private:
     Target target;
     const float max_adv_speed = 1000;
 
+    enum class Estado{IDLE, FORWARD, TURN, BORDER};
+    Estado estado;
+
+    void forward(RoboCompGenericBase::TBaseState bState);
     QPointF world_to_robot(Target target, RoboCompGenericBase::TBaseState state);
-
     float dist_to_target(float dist);
-
     float rotation_speed(float beta);
 };
 

@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2021 by YOUR NAME HERE
+ *    Copyright (C) 2021 by DANIEL LEAL MIRANDA & ALEJANDRO GONZÁLEZ FERNANDEZ
  *
  *    This file is part of RoboComp
  *
@@ -46,11 +46,6 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 //	}
 //	catch(const std::exception &e) { qFatal("Error reading config params"); }
 
-
-
-
-
-
 	return true;
 }
 
@@ -73,6 +68,7 @@ void SpecificWorker::initialize(int period)
     robot_polygon = viewer->add_robot(ROBOT_LENGTH);
     laser_in_robot_polygon = new QGraphicsRectItem(-10, 10, 20, 20, robot_polygon);
     laser_in_robot_polygon->setPos(0, 190);     // move this to abstract
+
     try
     {
         RoboCompGenericBase::TBaseState bState;
@@ -83,61 +79,78 @@ void SpecificWorker::initialize(int period)
 
     connect(viewer, &AbstractGraphicViewer::new_mouse_coordinates, this, &SpecificWorker::new_target_slot);
 
+    estado = Estado::IDLE;
 }
 
 void SpecificWorker::compute()
 {
     RoboCompGenericBase::TBaseState bState;
-    try {
-        // read laser data
+//    try {
         RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();
         draw_laser(ldata);
 
-    }
-    catch(const Ice::Exception &ex)
+            differentialrobot_proxy->getBaseState(bState);
+            robot_polygon->setRotation(bState.alpha*180/M_PI);
+            robot_polygon->setPos(bState.x, bState.z);
+
+//    }
+//    catch (const Ice::Exception &ex){
+//        std::cout << ex << std::endl;
+//    }
+
+    switch(estado)
     {
-        std::cout << ex << std::endl;
+        case Estado::IDLE:
+            if(target.activo)
+                estado = Estado::FORWARD;
+            break;
+
+        case Estado::FORWARD:
+            std::sort( ldata.begin() + 10, ldata.end() - 10, [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return a.dist < b.dist;});
+
+//            if(ldata[10].dist < 400)
+//                estado = Estado::BORDER;
+//            else
+                forward(bState);
+            break;
+
+//        case Estado::BORDER:
+//
+//            break;
+//
+//        case Estado::TURN:
+//
+//            break;
+
     }
 
-    try
-    {
-        differentialrobot_proxy->getBaseState(bState);
-        robot_polygon->setRotation(bState.alpha*180/M_PI);
-        robot_polygon->setPos(bState.x, bState.z);
-        //qInfo() << bState.x << bState.z << bState.alpha;
-
-    }
-    catch (const Ice::Exception &ex){
-        std::cout << ex << std::endl;
-    }
-
-    if(target.activo) {
-        // si el robot esta en el target, ponemos el target a false
-        Eigen::Vector2f robot_eigen(bState.x, bState.z);
-        Eigen::Vector2f target_eigen (target.dest.x(), target.dest.y());
-        if (float dist = (robot_eigen - target_eigen).norm(); dist > 100)
-        {
-
-            // convertir el target a coordenadas del robot
-            QPointF pr = world_to_robot(target, bState);
-            // obtener el angulo beta (robot - target)
-            float beta = atan2(pr.x(), pr.y());
-            // obtener velocidad de avance (primero a 0)
-            float adv = max_adv_speed * dist_to_target(dist) * rotation_speed(beta);
-            // mover el robot con la velocidad obtenida
-
-            try {
-                differentialrobot_proxy->setSpeedBase(adv, beta);
-            }
-            catch (const Ice::Exception &ex) {
-                std::cout << ex << std::endl;
-            }
-        } else {
-            target.activo = false;
-            differentialrobot_proxy->setSpeedBase(0, 0);
-        }
-    }
-}
+//    if(target.activo) {
+//        // si el robot esta en el target, ponemos el target a false
+//        Eigen::Vector2f robot_eigen(bState.x, bState.z);
+//        Eigen::Vector2f target_eigen (target.dest.x(), target.dest.y());
+//        if (float dist = (robot_eigen - target_eigen).norm(); dist > 100)
+//        {
+//
+//            // convertir el target a coordenadas del robot
+//            QPointF pr = world_to_robot(target, bState);
+//            // obtener el angulo beta (robot - target)
+//            float beta = atan2(pr.x(), pr.y());
+//            // obtener velocidad de avance (primero a 0)
+//            float adv = max_adv_speed * dist_to_target(dist) * rotation_speed(beta);
+//            // mover el robot con la velocidad obtenida
+//
+//            try {
+//                differentialrobot_proxy->setSpeedBase(adv, beta);
+//            }
+//            catch (const Ice::Exception &ex) {
+//                std::cout << ex << std::endl;
+//            }
+//        } else {
+//            target.activo = false;
+//            differentialrobot_proxy->setSpeedBase(0, 0);
+//        }
+//    }
+  }
 
 void SpecificWorker :: draw_laser(const RoboCompLaser:: TLaserData &ldata)
 {
@@ -210,12 +223,31 @@ float SpecificWorker::rotation_speed(float beta) {
     return exp(-(beta * beta) / lambda);
 }
 
-/* if d>1 -> v=1
- * else
- * pendiente*distancia la pendiente depende del valor, otra forma es la sigmoide s=1/1-e^x
- * queremos que frene cuando este girando, cuando vel=0, angulo=1. varia la funcion en funcion del parametro (funcion gaussiana)
- * g = e^(-x^2/lamda) -> ln 0.4 = -0.5^2/lamda -> lamda = -gh^2 / ln ah
-*/
+void SpecificWorker::forward(RoboCompGenericBase::TBaseState bState) {
+    Eigen::Vector2f robot_eigen(bState.x, bState.z);
+    Eigen::Vector2f target_eigen (target.dest.x(), target.dest.y());
+
+    if (float dist = (robot_eigen - target_eigen).norm(); dist > 100)
+    {
+        // convertir el target a coordenadas del robot
+        QPointF pr = world_to_robot(target, bState);
+        // obtener el angulo beta (robot - target)
+        float beta = atan2(pr.x(), pr.y());
+        // obtener velocidad de avance (primero a 0)
+        float adv = max_adv_speed * dist_to_target(dist) * rotation_speed(beta);
+        // mover el robot con la velocidad obtenida
+
+        try {
+            differentialrobot_proxy->setSpeedBase(adv, beta);
+        }
+        catch (const Ice::Exception &ex) {
+            std::cout << ex << std::endl;
+        }
+    } else {
+        target.activo = false;
+        differentialrobot_proxy->setSpeedBase(0, 0);
+    }
+}
 
 /**************************************/
 // From the RoboCompDifferentialRobot you can call this methods:
