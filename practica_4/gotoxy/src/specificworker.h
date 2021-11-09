@@ -73,6 +73,16 @@ private:
     QPointF world_to_robot(Target target, RoboCompGenericBase::TBaseState state);
     float dist_to_target(float dist);
     float rotation_speed(float beta);
+
+    bool check_free_path_to_target(const RoboCompLaser::TLaserData &ldata, RoboCompGenericBase::TBaseState bState);
+
+    Eigen::Vector2f robot_to_world(Eigen::Vector2f p, RoboCompGenericBase::TBaseState bState);
+
+    bool check_obstacle(const RoboCompLaser::TLaserData &ldata, int dist);
+
+    void doBorder(const RoboCompLaser::TLaserData &ldata);
+
+    bool lateral_dist(const RoboCompLaser::TLaserData &ldata, int dist);
 };
 
 #endif
