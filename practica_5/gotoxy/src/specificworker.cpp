@@ -16,6 +16,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <cppitertools/range.hpp>
 #include "specificworker.h"
 
 /**
@@ -62,36 +63,47 @@ void SpecificWorker::initialize(int period)
 		timer.start(Period);
 	}
 
-    QRectF dimensions (-5000, -2500, 10000, 5000);
+    QRectF dimensions (-5100, -2600, 10200, 5200);
     viewer = new AbstractGraphicViewer(this, dimensions);
-    this->resize(900,450);
+    this->resize(1200,600);
     robot_polygon = viewer->add_robot(ROBOT_LENGTH);
     laser_in_robot_polygon = new QGraphicsRectItem(-10, 10, 20, 20, robot_polygon);
     laser_in_robot_polygon->setPos(0, 190);     // move this to abstract
 
+
+    RoboCompFullPoseEstimation::FullPoseEuler r_state;
+
     try
     {
-        RoboCompGenericBase::TBaseState bState;
-        differentialrobot_proxy->getBaseState(bState);
-        last_point = QPointF(bState.x, bState.z);
+        r_state = fullposeestimation_proxy->getFullPoseEuler();
+        robot_polygon->setRotation(r_state.rz*180/M_PI);
+        robot_polygon->setPos(r_state.x, r_state.y);
     }
     catch(const Ice::Exception &e) { std::cout << e.what() << std::endl;}
 
     connect(viewer, &AbstractGraphicViewer::new_mouse_coordinates, this, &SpecificWorker::new_target_slot);
-
     estado = Estado::IDLE;
+    grid.initialize(dimensions, 100, &viewer->scene);
 }
 
 void SpecificWorker::compute()
 {
+    RoboCompFullPoseEstimation::FullPoseEuler r_state;
     RoboCompGenericBase::TBaseState bState;
+    RoboCompLaser::TLaserData ldata;
 
-        RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();
+    try
+    {
+        r_state = fullposeestimation_proxy->getFullPoseEuler();
+        robot_polygon->setRotation(r_state.rz*180/M_PI);
+        robot_polygon->setPos(r_state.x, r_state.y);
+        ldata = laser_proxy->getLaserData();
         draw_laser(ldata);
+        differentialrobot_proxy->getBaseState(bState);
+    }
+    catch(const Ice::Exception &e){ std::cout << e.what() << std::endl;}
 
-            differentialrobot_proxy->getBaseState(bState);
-            robot_polygon->setRotation(bState.alpha*180/M_PI);
-            robot_polygon->setPos(bState.x, bState.z);
+    update_map(ldata, r_state);
 
     switch(estado)
     {
@@ -108,7 +120,7 @@ void SpecificWorker::compute()
             if(!umbral_Obst(ldata, (ldata.size()/2) - 30, ldata.size()/2, 400))
                 estado = Estado::TURN;
             else
-                forward(bState);
+                //forward(r_state);
             break;
 
         case Estado::BORDER:
@@ -127,6 +139,38 @@ void SpecificWorker::compute()
             break;
     }
   }
+
+void SpecificWorker::update_map(const RoboCompLaser::TLaserData &ldata, RoboCompFullPoseEstimation::FullPoseEuler &r_state)
+{
+    QPointF lineP;
+    Eigen::Vector2f lw;
+
+    for (auto &l:ldata) {
+        float step = ceil(l.dist / (TILE_SIZE / 2.0));
+        lw = Eigen::Vector2f(l.dist * sin(l.angle), l.dist * cos(l.angle));
+        lineP = robot_to_world(lw, r_state);
+        float lastX = -1000000;
+        float lastY = -1000000;
+        float tarX = (lineP.x() - grid.dim.left()) / grid.TILE_SIZE;
+        float tarY = (lineP.y() - grid.dim.bottom()) / grid.TILE_SIZE;
+        for (const auto &&step: iter::range(0.0, 1.0 - (1.0 / step), 1.0 / step)) {
+            lineP = robot_to_world( lw * step, r_state);
+            float kx = (lineP.x() - grid.dim.left()) / grid.TILE_SIZE;
+            float ky = (lineP.y() - grid.dim.bottom()) / grid.TILE_SIZE;
+            if (kx != lastX && kx != tarX && ky != lastY && ky != tarY) {
+                lineP = robot_to_world(lw * step, r_state);
+                grid.add_miss(Eigen::Vector2f(lineP.x(), lineP.y()));
+            }
+            lastX = kx;
+            lastY = ky;
+        }
+
+        if (l.dist <= MAX_LASER_DIST) {
+            lineP = robot_to_world(lw, r_state);
+            grid.add_hit(Eigen::Vector2f(lineP.x(), lineP.y()));
+        }
+    }
+}
 
 void SpecificWorker :: draw_laser(const RoboCompLaser:: TLaserData &ldata)
 {
@@ -168,21 +212,33 @@ int SpecificWorker::startup_check()
 	return 0;
 }
 
-QPointF SpecificWorker::world_to_robot(SpecificWorker::Target target, RoboCompGenericBase::TBaseState state) {
+QPointF SpecificWorker::world_to_robot(Eigen::Vector2f point_in_world, RoboCompFullPoseEstimation::FullPoseEuler &r_state) {
 
-	float angulo = state.alpha;
-	Eigen::Vector2f posdest(target.dest.x(), target.dest.y()), posrobot(state.x, state.z);
+	float angulo = r_state.rz;
+	Eigen::Vector2f posrobot(r_state.x, r_state.y);
 	Eigen::Matrix2f matriz(2,2);
 	
 	matriz << cos(angulo), sin(angulo), -sin(angulo), cos(angulo);
 	
-	Eigen::Vector2f estado = matriz * (posdest - posrobot);
+	Eigen::Vector2f estado = matriz * (point_in_world - posrobot);
 
     std::cout << estado[0] << "\t" << estado[1] << std::endl;
 
     return QPointF(estado[0], estado[1]); // crear matriz con eigen 2f. bstate.angle
 }
 
+QPointF SpecificWorker::robot_to_world(Eigen::Vector2f TW, RoboCompFullPoseEstimation::FullPoseEuler &r_state)
+{
+    float angulo = r_state.rz;
+    Eigen::Vector2f posrobot(r_state.x,r_state.y);
+    Eigen::Matrix2f matriz(2,2);
+
+    matriz << cos(angulo), sin(angulo), -sin(angulo), cos(angulo);
+
+    auto estado = matriz * TW + posrobot;
+
+    return QPointF(estado.x(),estado.y());
+}
 
 float SpecificWorker::dist_to_target(float dist)
 {
@@ -222,35 +278,6 @@ int SpecificWorker::umbral_Obst_dist(RoboCompLaser::TLaserData ldata, int a, int
     return (*min).dist;
 }
 
-void SpecificWorker::forward(RoboCompGenericBase::TBaseState bState) {
-    Eigen::Vector2f robot_eigen(bState.x, bState.z);
-    Eigen::Vector2f target_eigen (target.dest.x(), target.dest.y());
-
-    RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();
-    std::sort( ldata.begin() + 10, ldata.end() - 10, [](RoboCompLaser::TData a, RoboCompLaser::TData b){ return a.dist < b.dist;});
-
-    if (float dist = (robot_eigen - target_eigen).norm(); dist > 100)
-    {
-        // convertir el target a coordenadas del robot
-        QPointF pr = world_to_robot(target, bState);
-        // obtener el angulo beta (robot - target)
-        float beta = atan2(pr.x(), pr.y());
-        // obtener velocidad de avance (primero a 0)
-        float adv = max_adv_speed * dist_to_target(dist) * rotation_speed(beta) * dist_to_obstacle(ldata);
-        // mover el robot con la velocidad obtenida
-
-        try {
-            differentialrobot_proxy->setSpeedBase(adv, beta);
-        }
-        catch (const Ice::Exception &ex) {
-            std::cout << ex << std::endl;
-        }
-    } else {
-        target.activo = false;
-        estado = Estado::IDLE;
-        differentialrobot_proxy->setSpeedBase(0, 0);
-    }
-}
 
 /**************************************/
 // From the RoboCompDifferentialRobot you can call this methods:

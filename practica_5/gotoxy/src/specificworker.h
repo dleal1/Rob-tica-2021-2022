@@ -32,6 +32,8 @@
 #include <abstract_graphic_viewer/abstract_graphic_viewer.h>
 #include <eigen3/Eigen/Eigen>
 #include <cppitertools/enumerate.hpp>
+#include <grid2d/grid.h>
+#include <cppitertools/range.hpp>
 
 #include <vector>
 #include <utility>
@@ -57,9 +59,14 @@ private:
 
     AbstractGraphicViewer *viewer;
     const int ROBOT_LENGTH = 400;
+    const int MAX_LASER_DIST = 4000;
     QGraphicsPolygonItem *robot_polygon;
     QGraphicsRectItem *laser_in_robot_polygon;
     QPointF last_point;
+
+    Grid grid;
+    const int TILE_SIZE = 200;
+    RoboCompFullPoseEstimation::FullPoseEuler r_state;
 
     struct Target {
         QPointF dest;
@@ -73,7 +80,8 @@ private:
     Estado estado;
 
     void forward(RoboCompGenericBase::TBaseState bState);
-    QPointF world_to_robot(Target target, RoboCompGenericBase::TBaseState state);
+    QPointF world_to_robot(Eigen::Vector2f point_in_world, RoboCompFullPoseEstimation::FullPoseEuler &r_state);
+    QPointF robot_to_world(Eigen::Vector2f TW, RoboCompFullPoseEstimation::FullPoseEuler &bState);
     float dist_to_target(float dist);
     float rotation_speed(float beta);
 
@@ -82,6 +90,8 @@ private:
     bool umbral_Obst(RoboCompLaser::TLaserData ldata, int a, int b, int threshold);
 
     int umbral_Obst_dist(RoboCompLaser::TLaserData ldata, int a, int b);
+
+    void update_map(const RoboCompLaser::TLaserData &ldata, RoboCompFullPoseEstimation::FullPoseEuler &r_state);
 };
 
 #endif
