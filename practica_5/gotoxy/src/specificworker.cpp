@@ -72,24 +72,29 @@ void SpecificWorker::initialize(int period)
 
 
     RoboCompFullPoseEstimation::FullPoseEuler r_state;
+    RoboCompLaser::TLaserData ldata;
 
     try
     {
+        ldata = laser_proxy->getLaserData();
+        draw_laser(ldata);
+
         r_state = fullposeestimation_proxy->getFullPoseEuler();
         robot_polygon->setRotation(r_state.rz*180/M_PI);
         robot_polygon->setPos(r_state.x, r_state.y);
+
+
     }
     catch(const Ice::Exception &e) { std::cout << e.what() << std::endl;}
 
     connect(viewer, &AbstractGraphicViewer::new_mouse_coordinates, this, &SpecificWorker::new_target_slot);
     estado = Estado::IDLE;
-    grid.initialize(dimensions, 100, &viewer->scene);
+    grid.initialize(dimensions, 200, &viewer->scene);
 }
 
 void SpecificWorker::compute()
 {
     RoboCompFullPoseEstimation::FullPoseEuler r_state;
-    RoboCompGenericBase::TBaseState bState;
     RoboCompLaser::TLaserData ldata;
 
     try
@@ -98,8 +103,6 @@ void SpecificWorker::compute()
         robot_polygon->setRotation(r_state.rz*180/M_PI);
         robot_polygon->setPos(r_state.x, r_state.y);
         ldata = laser_proxy->getLaserData();
-        draw_laser(ldata);
-        differentialrobot_proxy->getBaseState(bState);
     }
     catch(const Ice::Exception &e){ std::cout << e.what() << std::endl;}
 
@@ -108,41 +111,41 @@ void SpecificWorker::compute()
     switch(estado)
     {
         case Estado::IDLE:
-            std::cout << "Estado -> IDLE " << std::endl;
-
-            if(target.activo)
-                estado = Estado::FORWARD;
+            std::cout << "Estado: IDLE" << std::endl;
+            estado = Estado::INIT_TURN;
             break;
 
-        case Estado::FORWARD:
-            std::cout << "Estado -> FORWARD, MIN-DIST -> " << umbral_Obst_dist(ldata, (ldata.size()/2) - 30, ldata.size()/2) << std::endl;
-
-            if(!umbral_Obst(ldata, (ldata.size()/2) - 30, ldata.size()/2, 400))
-                estado = Estado::TURN;
-            else
-                //forward(r_state);
+        case Estado::INIT_TURN:
+            std::cout << "Estado: INIT_TURN" << std::endl;
+            initial_angle = (r_state.rz < 0) ? (2 * M_PI + r_state.rz) : r_state.rz;
+            estado = exploring(ldata, r_state);
             break;
 
-        case Estado::BORDER:
-
+        case Estado::EXPLORING:
+            std::cout << "Estado: EXPLORING" << std::endl;
+            try
+            {
+                estado = exploring(ldata,r_state);
+            } catch (const Ice::Exception &e) {
+                std::cout << e.what() << std::endl;
+            }
             break;
 
-        case Estado::TURN:
-            std::cout << "Estado -> TURN, MIN-DIST -> " << umbral_Obst_dist(ldata, (ldata.size()/2) - 30, ldata.size()/2) << std::endl;
-
-            if (umbral_Obst(ldata, (ldata.size()/2) - 30, ldata.size()/2, 400))
-                estado = Estado::FORWARD;
-            else {
-
-                differentialrobot_proxy->setSpeedBase(0, 1);
+        case Estado::DOOR:
+            std::cout << "Estado: DOOR" << std::endl;
+            try
+            {
+                estado = doorS(ldata, r_state);
+            } catch (const Ice::Exception &e) {
+                std::cout << e.what() << std::endl;
             }
             break;
     }
   }
 
-void SpecificWorker::update_map(const RoboCompLaser::TLaserData &ldata, RoboCompFullPoseEstimation::FullPoseEuler &r_state)
+void SpecificWorker::update_map(const RoboCompLaser::TLaserData &ldata, const RoboCompFullPoseEstimation::FullPoseEuler &r_state)
 {
-    QPointF lineP;
+    Eigen::Vector2f lineP;
     Eigen::Vector2f lw;
 
     for (auto &l:ldata) {
@@ -172,7 +175,92 @@ void SpecificWorker::update_map(const RoboCompLaser::TLaserData &ldata, RoboComp
     }
 }
 
-void SpecificWorker :: draw_laser(const RoboCompLaser:: TLaserData &ldata)
+SpecificWorker::Estado SpecificWorker::exploring(const RoboCompLaser::TLaserData &ldata,const RoboCompFullPoseEstimation::FullPoseEuler &r_state)
+{
+    float current = (r_state.rz < 0) ? (2 * M_PI + r_state.rz) : r_state.rz;
+
+    float stop = grid.percentage_changed()*1000;
+    cout << "STOP VALUE: " << stop << endl;
+
+    //update_map(ldata, r_state);
+
+    if (fabs(current - initial_angle) < (M_PI + 0.1) and
+           fabs(current - initial_angle) > (M_PI - 0.1))
+    {
+        differentialrobot_proxy->setSpeedBase(0,0);
+        return Estado::DOOR;
+    } else {
+        // search for corners. Compute derivative wrt distance
+        std::vector<float> derivatives(ldata.size());
+        derivatives[0] = 0;
+        for (const auto &&[k, l]: iter::sliding_window(ldata, 2) | iter::enumerate) {
+            derivatives[k + 1] = l[1].dist - l[0].dist;
+        }
+
+        // filter derivatives greater than a threshold
+        std::vector<Eigen::Vector2f> peaks;
+        for (const auto &&[k, der]: iter::enumerate(derivatives)) {
+            RoboCompLaser::TData l;
+            if (der > 800) {
+                l = ldata.at(k - 1);
+                peaks.push_back(robot_to_world(Eigen::Vector2f(l.dist * sin(l.angle), l.dist * cos(l.angle)), r_state));
+            } else if (der < -800) {
+                l = ldata.at(k);
+                peaks.push_back(robot_to_world(Eigen::Vector2f(l.dist * sin(l.angle), l.dist * cos(l.angle)), r_state));
+            }
+        }
+        for (auto &&c: iter::combinations_with_replacement(peaks, 2)) {
+            if ((c[0] - c[1]).norm() < 1100 and (c[0] - c[1]).norm() > 900) {
+                Door d{c[0], c[1]};
+                //d.rooms.insert(current_room);
+                if (auto r = std::find_if(doors.begin(), doors.end(),
+                                          [d](auto a) { return d == a; }); r == doors.end())
+                    doors.emplace_back(d);
+            }
+        }
+        cout << "Puertas: " << doors.size() << endl;
+
+        static std::vector<QGraphicsItem*> door_points;
+        for(auto dp : door_points) viewer->scene.removeItem(dp);
+        door_points.clear();
+        for(const auto p: peaks)
+        {
+            door_points.push_back(viewer->scene.addRect(QRectF(p.x()-100, p.y()-100, 200, 200),
+                                                        QPen(QColor("Magenta")), QBrush(QColor("Magenta"))));
+            door_points.back()->setZValue(200);
+        }
+
+        try {
+            differentialrobot_proxy->setSpeedBase(0, 1);
+        } catch (const Ice::Exception &e) {
+            std::cout << e.what() << std::endl;
+        }
+        return Estado::EXPLORING;
+    }
+}
+
+SpecificWorker::Estado SpecificWorker::doorS(const RoboCompLaser::TLaserData &ldata, const RoboCompFullPoseEstimation::FullPoseEuler &r_state)
+{
+    float threshold = 500;
+    static RoboCompLaser::TData best_distance_previous = ldata[180];
+    RoboCompLaser::TData actual_distance = ldata[180];
+    static int doors2 = 0;
+    int cx, cy;
+
+    if(doors2 == 2)
+    {
+        doors2 = 0;
+        try
+        {
+            differentialrobot_proxy->setSpeedBase(0,0);
+        } catch (const Ice::Exception &e) {
+            std::cout << e.what() << std::endl;
+        }
+        return Estado::NEXTROOM;
+    }
+}
+
+void SpecificWorker::draw_laser(const RoboCompLaser:: TLaserData &ldata)
 {
     static QGraphicsItem *laser_polygon = nullptr;
     QPolygonF poly;
@@ -196,15 +284,6 @@ void SpecificWorker :: draw_laser(const RoboCompLaser:: TLaserData &ldata)
     laser_polygon->setZValue(3);
 }
 
-void SpecificWorker :: new_target_slot(QPointF point){
-
-    qInfo() << point;       // muestra coordenadas con click
-
-    target.dest = point;
-    target.activo = true;
-
-}
-
 int SpecificWorker::startup_check()
 {
 	std::cout << "Startup check" << std::endl;
@@ -212,14 +291,23 @@ int SpecificWorker::startup_check()
 	return 0;
 }
 
-QPointF SpecificWorker::world_to_robot(Eigen::Vector2f point_in_world, RoboCompFullPoseEstimation::FullPoseEuler &r_state) {
+void SpecificWorker :: new_target_slot(QPointF point){
+
+    qInfo() << point;
+
+    target.dest = point;
+    target.activo = true;
+
+}
+
+QPointF SpecificWorker::world_to_robot(RoboCompFullPoseEstimation::FullPoseEuler &r_state) {
 
 	float angulo = r_state.rz;
-	Eigen::Vector2f posrobot(r_state.x, r_state.y);
+	Eigen::Vector2f posrobot(r_state.x, r_state.y), point_in_world(target.dest.x(), target.dest.y());
 	Eigen::Matrix2f matriz(2,2);
-	
+
 	matriz << cos(angulo), sin(angulo), -sin(angulo), cos(angulo);
-	
+
 	Eigen::Vector2f estado = matriz * (point_in_world - posrobot);
 
     std::cout << estado[0] << "\t" << estado[1] << std::endl;
@@ -227,7 +315,7 @@ QPointF SpecificWorker::world_to_robot(Eigen::Vector2f point_in_world, RoboCompF
     return QPointF(estado[0], estado[1]); // crear matriz con eigen 2f. bstate.angle
 }
 
-QPointF SpecificWorker::robot_to_world(Eigen::Vector2f TW, RoboCompFullPoseEstimation::FullPoseEuler &r_state)
+Eigen::Vector2f SpecificWorker::robot_to_world(Eigen::Vector2f TW, const RoboCompFullPoseEstimation::FullPoseEuler &r_state)
 {
     float angulo = r_state.rz;
     Eigen::Vector2f posrobot(r_state.x,r_state.y);
@@ -237,45 +325,7 @@ QPointF SpecificWorker::robot_to_world(Eigen::Vector2f TW, RoboCompFullPoseEstim
 
     auto estado = matriz * TW + posrobot;
 
-    return QPointF(estado.x(),estado.y());
-}
-
-float SpecificWorker::dist_to_target(float dist)
-{
-    if(dist > 1000)
-        return 1;
-    else
-        return (1.0/1000.0) * dist;
-}
-
-float SpecificWorker::dist_to_obstacle( RoboCompLaser::TLaserData ldata)
-{
-    int minDistance = umbral_Obst_dist(ldata, (ldata.size()/2) - ldata.size()/2, 10);
-    if(minDistance > 1000)
-        return 1;
-    else
-        return (1.0/1000.0) * minDistance;
-}
-
-float SpecificWorker::rotation_speed(float beta) {
-
-    static float lambda = -(0.5 * 0.5) / log(0.1);
-
-    return exp(-(beta * beta) / lambda);
-}
-
-bool SpecificWorker::umbral_Obst(RoboCompLaser::TLaserData ldata, int a, int b, int threshold)
-{
-    auto min = std::min_element(ldata.begin() + a, ldata.begin() + a + b, [](auto a, auto b){ return a.dist < b.dist;});
-
-    return (*min).dist > threshold;
-}
-
-int SpecificWorker::umbral_Obst_dist(RoboCompLaser::TLaserData ldata, int a, int b)
-{
-    auto min = std::min_element(ldata.begin() + a, ldata.begin() + a + b, [](auto a, auto b){ return a.dist < b.dist;});
-
-    return (*min).dist;
+    return estado;
 }
 
 

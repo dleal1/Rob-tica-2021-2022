@@ -1,7 +1,8 @@
 # Hashes of file build rules.
-f15595823069ccfbf158e7a544f8a32e src/CMakeFiles/GotoXY_autogen
-b8cdc06cd175363350ec02b973129d9d src/CommonBehavior.cpp
-42978efd0bda751c930c25ae4c83e17a src/DifferentialRobot.cpp
-1a92a0fd40259acccf7a9a278bbcf8f2 src/GenericBase.cpp
-67432d51d1684a15a2e4b8e81eeba281 src/Laser.cpp
-91290034fe7e006a500829e3a9001902 src/ui_mainUI.h
+74ef5b004ed334c86307f0e1205a3df1 src/CMakeFiles/GotoXY_autogen
+253ff230bf78bed32b716af4cfbe0f4f src/CommonBehavior.cpp
+747abe8b6a70e3e67560a560af43d8db src/DifferentialRobot.cpp
+7e77bd2f884fde08aa9f4a624af38828 src/FullPoseEstimation.cpp
+89aca4b4c80a2e675b0ac0ee82e93955 src/GenericBase.cpp
+01f24b140e39b7162e42443050fc35a3 src/Laser.cpp
+e5acb6969c2201a46ee98e215747470b src/ui_mainUI.h

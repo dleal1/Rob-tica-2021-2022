@@ -32,8 +32,9 @@
 #include <abstract_graphic_viewer/abstract_graphic_viewer.h>
 #include <eigen3/Eigen/Eigen>
 #include <cppitertools/enumerate.hpp>
+#include <cppitertools/sliding_window.hpp>
+#include <cppitertools/combinations_with_replacement.hpp>
 #include <grid2d/grid.h>
-#include <cppitertools/range.hpp>
 
 #include <vector>
 #include <utility>
@@ -47,11 +48,12 @@ public:
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
 
 public slots:
+    void initialize(int period);
 	void compute();
 	int startup_check();
+
     void draw_laser(const RoboCompLaser:: TLaserData & ldata);
-	void initialize(int period);
-    void new_target_slot(QPointF point);
+    void new_target_slot(QPointF p);
 
 private:
 	std::shared_ptr < InnerModel > innerModel;
@@ -59,39 +61,59 @@ private:
 
     AbstractGraphicViewer *viewer;
     const int ROBOT_LENGTH = 400;
-    const int MAX_LASER_DIST = 4000;
     QGraphicsPolygonItem *robot_polygon;
     QGraphicsRectItem *laser_in_robot_polygon;
     QPointF last_point;
 
-    Grid grid;
-    const int TILE_SIZE = 200;
-    RoboCompFullPoseEstimation::FullPoseEuler r_state;
+    float initial_angle = 0.0;
 
     struct Target {
         QPointF dest;
         bool activo;
-
     };
     Target target;
-    const float max_adv_speed = 1000;
 
-    enum class Estado{IDLE, FORWARD, TURN, BORDER};
+    Grid grid;
+    const int TILE_SIZE = 200;
+    const int MAX_LASER_DIST = 4000;
+    RoboCompFullPoseEstimation::FullPoseEuler r_state;
+
+    QLineF door;
+    QPointF target_to_robot;
+
+    enum class Estado{IDLE, INIT_TURN, EXPLORING, DOOR, NEXTROOM, CENTERROOM};
     Estado estado;
+    std::vector<int> VectorLinea;
 
-    void forward(RoboCompGenericBase::TBaseState bState);
-    QPointF world_to_robot(Eigen::Vector2f point_in_world, RoboCompFullPoseEstimation::FullPoseEuler &r_state);
-    QPointF robot_to_world(Eigen::Vector2f TW, RoboCompFullPoseEstimation::FullPoseEuler &bState);
-    float dist_to_target(float dist);
-    float rotation_speed(float beta);
+    struct Door
+    {
+        Eigen::Vector2f dPoint1, dPoint2;
+        std::set<int> rooms;
+        bool operator==(const Door &d1)
+        {
+            const int EROR = 500;
+            return (dPoint1 - d1.dPoint1).norm() < EROR and (dPoint2 - d1.dPoint2).norm() < EROR or
+            (dPoint1 - d1.dPoint2).norm() < EROR and (dPoint2 - d1.dPoint1).norm() < EROR;
+        };
 
-    float dist_to_obstacle(RoboCompLaser::TLaserData ldata);
+        Eigen::Vector2f get_midpoint() const {return dPoint1 + ((dPoint2-dPoint1)/2.0);};
+        Eigen::Vector2f get_external_midpoint() const
+        {
+            Eigen::ParametrizedLine<float, 2> r =  Eigen::ParametrizedLine<float, 2>(get_midpoint(), (dPoint1-dPoint2).unitOrthogonal());
+            //qInfo() << __FUNCTION__ << r.pointAt(800.0).x() << r.pointAt(800.0).y();
+            return r.pointAt(1000.0);
+        };
+    };
 
-    bool umbral_Obst(RoboCompLaser::TLaserData ldata, int a, int b, int threshold);
+    std::vector<Door> doors;
 
-    int umbral_Obst_dist(RoboCompLaser::TLaserData ldata, int a, int b);
+    QPointF world_to_robot(RoboCompFullPoseEstimation::FullPoseEuler &r_state);
+    Eigen::Vector2f robot_to_world(Eigen::Vector2f TW, const RoboCompFullPoseEstimation::FullPoseEuler &bState);
 
-    void update_map(const RoboCompLaser::TLaserData &ldata, RoboCompFullPoseEstimation::FullPoseEuler &r_state);
+    void update_map(const RoboCompLaser::TLaserData &ldata, const RoboCompFullPoseEstimation::FullPoseEuler &r_state);
+
+    SpecificWorker::Estado exploring(const RoboCompLaser::TLaserData &ldata,const RoboCompFullPoseEstimation::FullPoseEuler &r_state);
+    SpecificWorker::Estado doorS(const RoboCompLaser::TLaserData &ldata, const RoboCompFullPoseEstimation::FullPoseEuler &r_state);
 };
 
 #endif
