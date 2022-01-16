@@ -85,13 +85,15 @@ void SpecificWorker::initialize(int period)
 void SpecificWorker::compute()
 {
     RoboCompGenericBase::TBaseState bState;
+    RoboCompLaser::TLaserData ldata;
 
-    RoboCompLaser::TLaserData ldata = laser_proxy->getLaserData();
-    draw_laser(ldata);
-
-    differentialrobot_proxy->getBaseState(bState);
-    robot_polygon->setRotation(bState.alpha*180/M_PI);
-    robot_polygon->setPos(bState.x, bState.z);
+    try {
+        differentialrobot_proxy->getBaseState(bState);
+        robot_polygon->setRotation(bState.alpha*180/M_PI);
+        robot_polygon->setPos(bState.x, bState.z);
+        ldata = laser_proxy->getLaserData();
+        draw_laser(ldata);
+    } catch(const Ice::Exception &e){std::cout << e.what() << std::endl;}
 
     switch(estado)
     {
@@ -122,7 +124,7 @@ void SpecificWorker::compute()
             if(check_free_path_to_target(ldata, bState))
                 estado = Estado::FORWARD;
             else
-                doBorder(ldata);
+                doBorder(ldata, bState);
             break;
     }
 }
@@ -134,7 +136,7 @@ void SpecificWorker::forward(RoboCompGenericBase::TBaseState bState) {
     if (float dist = (robot_eigen - target_eigen).norm(); dist > 100)
     {
         // convertir el target a coordenadas del robot
-        QPointF pr = world_to_robot(target, bState);
+        Eigen::Vector2f pr = world_to_robot(Eigen::Vector2f(target.dest.x(), target.dest.y()), bState);
         // obtener el angulo beta (robot - target)
         float beta = atan2(pr.x(), pr.y());
         // obtener velocidad de avance (primero a 0)
@@ -154,23 +156,31 @@ void SpecificWorker::forward(RoboCompGenericBase::TBaseState bState) {
     }
 }
 
-void SpecificWorker::doBorder(const RoboCompLaser::TLaserData &ldata)
+void SpecificWorker::doBorder(const RoboCompLaser::TLaserData &ldata, RoboCompGenericBase::TBaseState bState)
 {
-    if(lateral_dist(ldata, 200))
+    target.A = bState.z - target.dest.y();
+    target.B = target.dest.x() - bState.x;
+    target.C = (bState.x - target.dest.x()) * bState.z + (target.dest.y() - bState.z) * bState.x;
+
+    if(fabs((target.A * bState.x) + (target.B * bState.z) + target.C) / sqrt(pow(target.A,2) + pow(target.B,2)) < 100)
     {
-        differentialrobot_proxy->setSpeedBase(300, -0.6);
-    }
+        estado = Estado::FORWARD;
+    } else if(ldata[50].dist < 400)
+    {
+        if(ldata[50].dist < 400)
+            this->differentialrobot_proxy->setSpeedBase(100, 0.7);
+        else if(ldata[50].dist > 500)
+            this->differentialrobot_proxy->setSpeedBase(100, -0.7);
+        else
+            this->differentialrobot_proxy->setSpeedBase(100,0);
+    } else
+        estado = Estado::FORWARD;
 }
 
 bool SpecificWorker::check_obstacle(const RoboCompLaser::TLaserData &ldata, int dist)
 {
-    auto min = std::min_element(ldata.begin()+(ldata.size()/2 - 10), ldata.end()-(ldata.size()/2 + 10), [](auto a, auto b) { return a.dist < b.dist; });
+    auto min = std::min_element(ldata.begin()+(ldata.size()/3) - 10, ldata.end() - (ldata.size()/3) + 10, [](auto a, auto b) { return a.dist < b.dist; });
     return (*min).dist < dist;
-}
-
-bool SpecificWorker::lateral_dist(const RoboCompLaser::TLaserData &ldata, int dist)
-{
-    return (std::min_element(ldata.begin() + 20, ldata.begin() + 50, [](auto a, auto b) { return a.dist < b.dist; }))->dist < dist;
 }
 
 void SpecificWorker :: draw_laser(const RoboCompLaser:: TLaserData &ldata)
@@ -213,30 +223,26 @@ int SpecificWorker::startup_check()
 	return 0;
 }
 
-QPointF SpecificWorker::world_to_robot(SpecificWorker::Target target, RoboCompGenericBase::TBaseState state) {
+Eigen::Vector2f SpecificWorker::world_to_robot(const Eigen::Vector2f &p, RoboCompGenericBase::TBaseState bState) {
 
-	float angulo = state.alpha;
-	Eigen::Vector2f posdest(target.dest.x(), target.dest.y()), posrobot(state.x, state.z);
-	Eigen::Matrix2f matriz(2,2);
+	float angulo = bState.alpha;
+	Eigen::Vector2f posrobot(bState.x, bState.z);
+	Eigen::Matrix2f matriz;
 	
-	matriz << cos(angulo), sin(angulo), -sin(angulo), cos(angulo);
-	
-	Eigen::Vector2f estado = matriz * (posdest - posrobot);
+	matriz << cos(angulo), -sin(angulo), sin(angulo), cos(angulo);
 
-    std::cout << estado[0] << "\t" << estado[1] << std::endl;
-
-    return QPointF(estado[0], estado[1]); // crear matriz con eigen 2f. bstate.angle
+    return (matriz.transpose() * (p - posrobot));
 }
 
-Eigen::Vector2f SpecificWorker::robot_to_world(Eigen::Vector2f p, RoboCompGenericBase::TBaseState bState)
+Eigen::Vector2f SpecificWorker::robot_to_world(const Eigen::Vector2f &p, RoboCompGenericBase::TBaseState bState)
 {
     float angle = bState.alpha;
     Eigen::Vector2f posRobot(bState.x, bState.z);
-    Eigen::Matrix2f M(2,2);
+    Eigen::Matrix2f M;
 
-    M << cos(angle), sin(angle), -sin(angle), cos(angle);
+    M << cos(angle), -sin(angle), sin(angle), cos(angle);
 
-    return M.inverse() * (p - posRobot);
+    return (M * p) + posRobot;
 }
 
 float SpecificWorker::dist_to_target(float dist)
@@ -268,29 +274,26 @@ bool SpecificWorker::check_free_path_to_target( const RoboCompLaser::TLaserData 
         pol << QPointF(l.dist*sin(l.angle), l.dist*cos(l.angle));
 
     // create tube lines
-    auto goal_r = world_to_robot(target, bState);
+    auto goal_r = world_to_robot(Eigen::Vector2f(target.dest.x(), target.dest.y()), bState);
     Eigen::Vector2f robot(0.0,0.0);
-    Eigen::Vector2f vgoal_r(goal_r.x(), goal_r.y());
     // number of parts the target vector is divided into
-    float parts = (vgoal_r).norm()/(ROBOT_LENGTH/4);
+    float parts = (goal_r).norm()/(ROBOT_LENGTH/4);
     Eigen::Vector2f rside(220, 200);
     Eigen::Vector2f lside(-220, 200);
     if(parts < 1) return false;
 
     QPointF p,q, r;
-    for(float l=0.0; l <= 1.0; l+=1.0/parts)
+    for(auto l: iter::range(0.0, 1.0, 1.0/parts))
     {
-        p = toQPointF(robot*(1-l) + vgoal_r*l);
-        q = toQPointF((robot+rside)*(1-l) + (vgoal_r+rside)*l);
-        r = toQPointF((robot+lside)*(1-l) + (vgoal_r+lside)*l);
+        p = toQPointF(robot*(1-l) + goal_r*l);
+        q = toQPointF((robot+rside)*(1-l) + (goal_r+rside)*l);
+        r = toQPointF((robot+lside)*(1-l) + (goal_r+lside)*l);
         if( not pol.containsPoint(p, Qt::OddEvenFill) or
             not pol.containsPoint(q, Qt::OddEvenFill) or
             not pol.containsPoint(r, Qt::OddEvenFill)) {
             free_path = false;
-
             break;
-        } else
-            free_path = true;
+        }
     }
 
     // draw

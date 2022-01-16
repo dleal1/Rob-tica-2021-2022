@@ -32,6 +32,7 @@
 #include <abstract_graphic_viewer/abstract_graphic_viewer.h>
 #include <eigen3/Eigen/Eigen>
 #include <cppitertools/enumerate.hpp>
+#include <cppitertools/range.hpp>
 
 class SpecificWorker : public GenericWorker
 {
@@ -53,36 +54,36 @@ private:
 	bool startup_check_flag;
 
     AbstractGraphicViewer *viewer;
-    const int ROBOT_LENGTH = 400;
     QGraphicsPolygonItem *robot_polygon;
     QGraphicsRectItem *laser_in_robot_polygon;
     QPointF last_point;
 
+    const int ROBOT_LENGTH = 400;
+    const float max_adv_speed = 1000;
+
     struct Target {
         QPointF dest;
         bool activo;
-
+        float A,B,C;
+        Eigen::Vector2f to_eigen() const {return Eigen::Vector2f(dest.x(), dest.y());}
     };
     Target target;
-    const float max_adv_speed = 1000;
 
-    enum class Estado{IDLE, FORWARD, TURN, BORDER};
+    enum class Estado {IDLE, FORWARD, TURN, BORDER};
     Estado estado;
 
     void forward(RoboCompGenericBase::TBaseState bState);
-    QPointF world_to_robot(Target target, RoboCompGenericBase::TBaseState state);
     float dist_to_target(float dist);
     float rotation_speed(float beta);
 
     bool check_free_path_to_target(const RoboCompLaser::TLaserData &ldata, RoboCompGenericBase::TBaseState bState);
 
-    Eigen::Vector2f robot_to_world(Eigen::Vector2f p, RoboCompGenericBase::TBaseState bState);
+    Eigen::Vector2f world_to_robot(const Eigen::Vector2f &p, RoboCompGenericBase::TBaseState bState);
+    Eigen::Vector2f robot_to_world(const Eigen::Vector2f &p, RoboCompGenericBase::TBaseState bState);
 
     bool check_obstacle(const RoboCompLaser::TLaserData &ldata, int dist);
 
-    void doBorder(const RoboCompLaser::TLaserData &ldata);
-
-    bool lateral_dist(const RoboCompLaser::TLaserData &ldata, int dist);
+    void doBorder(const RoboCompLaser::TLaserData &ldata, RoboCompGenericBase::TBaseState bState);
 };
 
 #endif
